@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { PokemonCard } from '../../../../pokemons/components/pokemon-card/pokemon-card';
 
 @Component({
   selector: 'pokemon-list-skeleton',

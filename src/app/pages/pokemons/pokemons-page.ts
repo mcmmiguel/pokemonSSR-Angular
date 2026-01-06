@@ -10,6 +10,7 @@ import {
 import { PokemonsList } from '../../pokemons/components/pokemons-list/pokemons-list';
 import { PokemonListSkeleton } from './ui/pokemon-list-skeleton/pokemon-list-skeleton';
 import { PokemonsService } from '../../pokemons/services/pokemons.service';
+import { SimplePokemon } from '../../pokemons/interfaces';
 
 @Component({
   selector: 'app-pokemons-page',
@@ -22,6 +23,7 @@ export default class PokemonsPage implements OnInit {
   private appRef = inject(ApplicationRef);
 
   private pokemonsService = inject(PokemonsService);
+  pokemons = signal<SimplePokemon[]>([]);
 
   private $appState = this.appRef.isStable.subscribe((isStable) => {
     console.log({ isStable });
@@ -30,6 +32,7 @@ export default class PokemonsPage implements OnInit {
   public loadPokemons(nextPage = 0) {
     this.pokemonsService.loadPage(nextPage).subscribe((pokemons) => {
       console.log('ON INIT');
+      this.pokemons.set(pokemons);
     });
   }
 

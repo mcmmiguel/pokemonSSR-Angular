@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { PokemonCard } from '../pokemon-card/pokemon-card';
+import { SimplePokemon } from '../../interfaces';
 
 @Component({
   selector: 'app-pokemons-list',
@@ -7,4 +8,6 @@ import { PokemonCard } from '../pokemon-card/pokemon-card';
   templateUrl: './pokemons-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PokemonsList {}
+export class PokemonsList {
+  pokemons = input.required<SimplePokemon[]>();
+}
