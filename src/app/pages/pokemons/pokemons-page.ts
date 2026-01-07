@@ -2,6 +2,7 @@ import {
   ApplicationRef,
   ChangeDetectionStrategy,
   Component,
+  effect,
   inject,
   OnInit,
   signal,
@@ -10,18 +11,18 @@ import { PokemonsList } from '../../pokemons/components/pokemons-list/pokemons-l
 import { PokemonListSkeleton } from './ui/pokemon-list-skeleton/pokemon-list-skeleton';
 import { PokemonsService } from '../../pokemons/services/pokemons.service';
 import { SimplePokemon } from '../../pokemons/interfaces';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, tap } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-pokemons-page',
-  imports: [PokemonsList, PokemonListSkeleton],
+  imports: [PokemonsList, PokemonListSkeleton, RouterLink],
   templateUrl: './pokemons-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class PokemonsPage implements OnInit {
+export default class PokemonsPage {
   private appRef = inject(ApplicationRef);
   private pokemonsService = inject(PokemonsService);
 
@@ -29,17 +30,19 @@ export default class PokemonsPage implements OnInit {
   private router = inject(Router);
   private title = inject(Title);
 
+  loadOnPageChange = effect(() => {
+    this.loadPokemons(this.currentPage());
+  });
+
   currentPage = toSignal(
-    this.route.queryParamMap.pipe(
-      map((params) => params.get('page') ?? '1'),
+    this.route.params.pipe(
+      map((params) => params['page'] ?? '1'),
       map((page) => (isNaN(+page) ? 1 : +page)),
       map((page) => Math.max(1, page))
     )
   );
 
   pokemons = signal<SimplePokemon[]>([]);
-
-  // isLoading = signal(true);
 
   private $appState = this.appRef.isStable.subscribe((isStable) => {
     console.log({ isStable });
@@ -49,29 +52,10 @@ export default class PokemonsPage implements OnInit {
     const pageToLoad = this.currentPage()! + nextPage;
     this.pokemonsService
       .loadPage(pageToLoad)
-      .pipe(
-        tap(() =>
-          this.router.navigate([], {
-            queryParams: {
-              page: pageToLoad,
-            },
-          })
-        ),
-        tap(() => this.title.setTitle(`Pokemons SSR - Page ${pageToLoad}`))
-      )
+      .pipe(tap(() => this.title.setTitle(`Pokemons SSR - Page ${pageToLoad}`)))
       .subscribe((pokemons) => {
         console.log('ON INIT');
         this.pokemons.set(pokemons);
       });
   }
-
-  ngOnInit() {
-    this.route.queryParamMap.subscribe(console.log);
-    this.loadPokemons();
-  }
-
-  // ngOnDestroy(): void {
-  //   console.log('Destroy');
-  //   this.$appState.unsubscribe();
-  // }
 }
