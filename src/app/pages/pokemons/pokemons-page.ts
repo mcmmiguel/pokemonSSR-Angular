@@ -49,10 +49,9 @@ export default class PokemonsPage {
   });
 
   public loadPokemons(nextPage = 0) {
-    const pageToLoad = this.currentPage()! + nextPage;
     this.pokemonsService
-      .loadPage(pageToLoad)
-      .pipe(tap(() => this.title.setTitle(`Pokemons SSR - Page ${pageToLoad}`)))
+      .loadPage(nextPage)
+      .pipe(tap(() => this.title.setTitle(`Pokemons SSR - Page ${nextPage}`)))
       .subscribe((pokemons) => {
         console.log('ON INIT');
         this.pokemons.set(pokemons);
